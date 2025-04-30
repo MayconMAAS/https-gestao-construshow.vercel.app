@@ -1,119 +1,58 @@
-
 import { useState } from "react";
+import Chart from "chart.js/auto";
+import { Radar } from "react-chartjs-2";
 
-const perguntas = [
-  {
-    texto: "Como sua empresa organiza o estoque físico?",
-    opcoes: [
-      { texto: "Sem padrão definido.", pontos: 0 },
-      { texto: "Por categorias sem mapeamento.", pontos: 1 },
-      { texto: "Setores definidos.", pontos: 2 },
-      { texto: "Ruas, avenidas e pulmões com coletores.", pontos: 3 },
-    ],
-  },
-  {
-    texto: "Como você analisa o giro de estoque?",
-    opcoes: [
-      { texto: "Não analisa.", pontos: 0 },
-      { texto: "Só quando há falta ou excesso.", pontos: 1 },
-      { texto: "Com planilhas mensais.", pontos: 2 },
-      { texto: "Com BI automatizado.", pontos: 3 },
-    ],
-  },
-  {
-    texto: "Como é feita a conferência de entrada dos produtos?",
-    opcoes: [
-      { texto: "Visual e sem registro.", pontos: 0 },
-      { texto: "Papel e planilha.", pontos: 1 },
-      { texto: "Leitor de código simples.", pontos: 2 },
-      { texto: "Conferência cega com coletores.", pontos: 3 },
-    ],
-  },
-  {
-    texto: "Como trata produtos com avarias?",
-    opcoes: [
-      { texto: "Mistura no estoque.", pontos: 0 },
-      { texto: "Separa sem registro.", pontos: 1 },
-      { texto: "Registra como devolução.", pontos: 2 },
-      { texto: "Classifica e rastreia no sistema.", pontos: 3 },
-    ],
-  },
-  {
-    texto: "Como é a gestão entre filiais?",
-    opcoes: [
-      { texto: "Cada uma por si.", pontos: 0 },
-      { texto: "Telefone ou mensagens.", pontos: 1 },
-      { texto: "Planilhas compartilhadas.", pontos: 2 },
-      { texto: "Consulta saldos em tempo real.", pontos: 3 },
-    ],
-  },
-  {
-    texto: "O que acontece ao atingir estoque mínimo?",
-    opcoes: [
-      { texto: "Só percebe na ruptura.", pontos: 0 },
-      { texto: "Aviso manual do vendedor.", pontos: 1 },
-      { texto: "Planilha semanal.", pontos: 2 },
-      { texto: "Alerta automático + sugestão de compra.", pontos: 3 },
-    ],
-  },
-  {
-    texto: "Como evita vendas sem estoque?",
-    opcoes: [
-      { texto: "Não evita.", pontos: 0 },
-      { texto: "Consulta visual antes.", pontos: 1 },
-      { texto: "Alerta manual no sistema.", pontos: 2 },
-      { texto: "Bloqueio ou redirecionamento automático.", pontos: 3 },
-    ],
-  },
-  {
-    texto: "Como trata múltiplos de venda?",
-    opcoes: [
-      { texto: "Vende qualquer quantidade.", pontos: 0 },
-      { texto: "Depende da memória do vendedor.", pontos: 1 },
-      { texto: "Há aviso na venda.", pontos: 2 },
-      { texto: "Obrigação automatizada no sistema.", pontos: 3 },
-    ],
-  },
-  {
-    texto: "Como controla produtos reservados para entrega futura?",
-    opcoes: [
-      { texto: "Mistura com estoque comum.", pontos: 0 },
-      { texto: "Etiqueta física.", pontos: 1 },
-      { texto: "Registro em planilha.", pontos: 2 },
-      { texto: "Separação automática como saldo reservado.", pontos: 3 },
-    ],
-  },
-  {
-    texto: "Como é feita a separação para entrega?",
-    opcoes: [
-      { texto: "Só começa após pagamento.", pontos: 0 },
-      { texto: "Manual e lenta.", pontos: 1 },
-      { texto: "Separação sem integração com vendas.", pontos: 2 },
-      { texto: "Alerta automático após carrinho fechado.", pontos: 3 },
-    ],
-  },
-];
+// ... (perguntas mesmas de antes)
 
 export default function App() {
   const [respostas, setRespostas] = useState(Array(perguntas.length).fill(null));
   const [resultado, setResultado] = useState(null);
+  const [grafico, setGrafico] = useState(null);
 
   const calcularResultado = () => {
     const total = respostas.reduce((acc, val) => acc + (val ?? 0), 0);
-    if (total <= 10) setResultado("🔴 ESTOQUE CEGO");
-    else if (total <= 18) setResultado("🟡 ESTOQUE REATIVO");
-    else if (total <= 25) setResultado("🟠 ESTOQUE CONTROLADO");
-    else setResultado("🟢 ESTOQUE INTELIGENTE");
+
+    let nivel = "";
+    if (total <= 10) nivel = "🔴 ESTOQUE CEGO";
+    else if (total <= 18) nivel = "🟡 ESTOQUE REATIVO";
+    else if (total <= 25) nivel = "🟠 ESTOQUE CONTROLADO";
+    else nivel = "🟢 ESTOQUE INTELIGENTE";
+
+    setResultado({ texto: nivel, total });
+    setGrafico({
+      labels: ["Organização", "Automatização", "Controle", "Integração", "Previsibilidade"],
+      datasets: [
+        {
+          label: "Sua Empresa",
+          data: gerarRadar(total),
+          backgroundColor: "rgba(255,206,86,0.3)",
+          borderColor: "#f4c542",
+        },
+        {
+          label: "Construshow Ideal",
+          data: [3, 3, 3, 3, 3],
+          borderColor: "#4caf50",
+          borderDash: [5, 5],
+        },
+      ],
+    });
+  };
+
+  const gerarRadar = (pontos) => {
+    if (pontos <= 10) return [1, 0.5, 0.5, 0.5, 0.5];
+    if (pontos <= 18) return [1.5, 1.5, 1.5, 1.5, 1.5];
+    if (pontos <= 25) return [2, 2, 2, 2, 2];
+    return [3, 3, 3, 3, 3];
   };
 
   return (
     <div style={{ maxWidth: '700px', margin: 'auto', padding: '20px' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Diagnóstico de Estoque</h1>
+      <h1>Diagnóstico de Estoque</h1>
       {perguntas.map((pergunta, idx) => (
         <div key={idx} style={{ marginBottom: '20px' }}>
-          <p style={{ fontWeight: '600' }}>{pergunta.texto}</p>
+          <p><strong>{pergunta.texto}</strong></p>
           {pergunta.opcoes.map((op, i) => (
-            <label key={i} style={{ display: 'block', marginBottom: '5px' }}>
+            <label key={i} style={{ display: 'block' }}>
               <input
                 type="radio"
                 name={`pergunta-${idx}`}
@@ -122,16 +61,25 @@ export default function App() {
                   nova[idx] = op.pontos;
                   setRespostas(nova);
                 }}
-              />{" "}
-              {op.texto}
+              /> {op.texto}
             </label>
           ))}
         </div>
       ))}
       <button onClick={calcularResultado}>Ver Diagnóstico</button>
       {resultado && (
-        <div style={{ marginTop: '30px', fontSize: '20px', fontWeight: 'bold' }}>
-          Resultado: {resultado}
+        <div style={{ marginTop: '30px' }}>
+          <h2>Resultado: {resultado.texto}</h2>
+          <p>Total de pontos: {resultado.total}</p>
+          <ul>
+            <li><strong>Problema:</strong> Estoque com baixa inteligência operacional.</li>
+            <li><strong>Implicação:</strong> Retrabalho, perdas, falta de previsão.</li>
+            <li><strong>Atributo:</strong> BI, alerta, coletores, integração filiais.</li>
+            <li><strong>Benefício:</strong> Eficiência, prevenção de ruptura, agilidade.</li>
+          </ul>
+          <div style={{ width: '100%', maxWidth: 600 }}>
+            <Radar data={grafico} />
+          </div>
         </div>
       )}
     </div>
